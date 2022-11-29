@@ -2,14 +2,38 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use App\Repository\GroupeRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Post;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\GroupeRepository;
+use App\State\GroupeStateProcessor;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: GroupeRepository::class)]
-#[ApiResource()]
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            // read: true, 
+            normalizationContext: ['groups' => ['user:getCollection:read']],
+
+        ),
+        new Get(
+            // read: true, 
+            normalizationContext: ['groups' => ['user:get:read']],
+        ),
+
+    ],
+        
+    // normalizationContext: ['groups' => ['user:getCollection:read']],
+)]
+#[Post(processor: GroupeStateProcessor::class)]
+#[Put(processor: GroupeStateProcessor::class)]
+
 class Groupe
 {
     #[ORM\Id]
@@ -18,6 +42,8 @@ class Groupe
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:getCollection:read', 'user:get:read'])]
+    // #[Groups(['user:get:read'])]
     private ?string $name = null;
 
     #[ORM\Column]

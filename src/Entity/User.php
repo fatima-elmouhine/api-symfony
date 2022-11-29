@@ -2,14 +2,38 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Post;
 use Doctrine\ORM\Mapping as ORM;
+use App\State\UserStateProcessor;
 use App\Repository\UserRepository;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ApiResource()]
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            // read: true, 
+            normalizationContext: ['groups' => ['user:getCollection:read']],
+        ),
+        new Get(
+            // read: true, 
+            normalizationContext: ['groups' => ['user:get:read']],
+        ),
+
+    ],
+
+        
+    // normalizationContext: ['groups' => ['user:getCollection:read']],
+)]
+#[Post(processor: UserStateProcessor::class)]
+#[Put(processor: UserStateProcessor::class)]
+
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -18,6 +42,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Groups(['user:get:read'])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -30,9 +55,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:getCollection:read'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:getCollection:read'])]
     private ?string $lastname = null;
 
     #[ORM\Column]
@@ -42,6 +69,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
+    #[Groups(['user:get:read'])]
     private ?Groupe $groupe = null;
 
     public function getId(): ?int
