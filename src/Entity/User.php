@@ -2,43 +2,87 @@
 
 namespace App\Entity;
 
+use App\Entity\Groupe;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Patch;
 use Doctrine\ORM\Mapping as ORM;
 use App\State\UserStateProcessor;
 use App\Repository\UserRepository;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use App\Controller\GroupUserController;
+use App\Controller\UserGroupController;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[Get(processor: UserStateProcessor::class)]
+#[Post(processor: UserStateProcessor::class)]
+#[Put(processor: UserStateProcessor::class)]
+
 #[ApiResource(
     operations: [
+        new Post(
+            
+        ),
         new GetCollection(
             // read: true, 
+            // name: 'getUserGroup',
+            // uriTemplate : '/users/groups/{group_id}',
+            // uriVariables: [
+            //     'group_id' => new Link(fromClass: Groupe::class, toProperty: 'id'),
+            // ], 
+            // controller: GroupUserController::class,
             normalizationContext: ['groups' => ['user:getCollection:read']],
         ),
         new Get(
             // read: true, 
             normalizationContext: ['groups' => ['user:get:read']],
         ),
+        new Put(
+            name: 'registerUserGroup',
+            // routeName: 'registerUserGroup',
+            uriTemplate : '/users/{id}/groups/{group}',
+            // uriVariables: [
+            //     'id' => new Link(fromClass: User::class, toProperty: 'id'),
+            //     'group_id' => new Link(fromClass: Groupe::class),
+            // ], 
+            controller: UserGroupController::class,
+
+            read: false, 
+        //     normalizationContext: ['groups' => ['user:get:read']],
+        ),
 
     ],
+    // : [
+        
+        // new Post(
+            // 'userGroup' => [
+            //     'method' => 'POST',
+            //     'path' => '/users/{id}/groups/{group_id}',
+            //     'controller' => App\Controller\UserGroupController::class,
+            // ]
+        //     // read: true, 
+        //     normalizationContext: ['groups' => ['user:get:read']],
+        // ),
+       
+    // ],
 
         
     // normalizationContext: ['groups' => ['user:getCollection:read']],
 )]
-#[Post(processor: UserStateProcessor::class)]
-#[Put(processor: UserStateProcessor::class)]
+
 
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:getCollection:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -46,7 +90,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column]
-    private array $roles = [];
+    private array $roles = ['ROLE_USER'];
 
     /**
      * @var string The hashed password
