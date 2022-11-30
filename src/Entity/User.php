@@ -30,13 +30,6 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
             
         ),
         new GetCollection(
-            // read: true, 
-            // name: 'getUserGroup',
-            // uriTemplate : '/users/groups/{group_id}',
-            // uriVariables: [
-            //     'group_id' => new Link(fromClass: Groupe::class, toProperty: 'id'),
-            // ], 
-            // controller: GroupUserController::class,
             normalizationContext: ['groups' => ['user:getCollection:read']],
         ),
         new Get(
@@ -45,34 +38,14 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
         ),
         new Put(
             name: 'registerUserGroup',
-            // routeName: 'registerUserGroup',
             uriTemplate : '/users/{id}/groups/{group}',
-            // uriVariables: [
-            //     'id' => new Link(fromClass: User::class, toProperty: 'id'),
-            //     'group_id' => new Link(fromClass: Groupe::class),
-            // ], 
             controller: UserGroupController::class,
-
             read: false, 
         //     normalizationContext: ['groups' => ['user:get:read']],
         ),
+        new Post()
 
     ],
-    // : [
-        
-        // new Post(
-            // 'userGroup' => [
-            //     'method' => 'POST',
-            //     'path' => '/users/{id}/groups/{group_id}',
-            //     'controller' => App\Controller\UserGroupController::class,
-            // ]
-        //     // read: true, 
-        //     normalizationContext: ['groups' => ['user:get:read']],
-        // ),
-       
-    // ],
-
-        
     // normalizationContext: ['groups' => ['user:getCollection:read']],
 )]
 

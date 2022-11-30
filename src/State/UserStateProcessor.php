@@ -21,18 +21,12 @@ class UserStateProcessor implements ProcessorInterface
     
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): void
     {
-        // dd($data);
-        // Handle the state
-        // dd('titi');
-
-        // dd($operation instanceof Put);
         if($operation instanceof Post) {
             $data->setCreatedAt(new \DateTimeImmutable());
             $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPassword()));
 
         }
         if($operation instanceof Put || $operation instanceof Patch) {
-            dd($data);
             $data->setUpdatedAt(\DateTimeImmutable::createFromMutable(new \DateTime()));
         }
 
