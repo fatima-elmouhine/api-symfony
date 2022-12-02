@@ -6,16 +6,20 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Post;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\GroupeRepository;
 use App\State\GroupeStateProcessor;
+use App\Repository\GroupeRepository;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use App\Controller\GroupUserController;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 
+#[Post(processor: GroupeStateProcessor::class)]
+#[Put(processor: GroupeStateProcessor::class)]
 #[ORM\Entity(repositoryClass: GroupeRepository::class)]
 #[ApiResource(
+    formats: ['json'],
     operations: [
         new GetCollection(
             // read: true, 
@@ -24,15 +28,30 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ),
         new Get(
             // read: true, 
-            normalizationContext: ['groups' => ['user:get:read']],
+            normalizationContext: ['groups' => ['group:get:read']],
         ),
+
+        new GetCollection(
+            uriTemplate : '/groups/users',
+            controller: GroupUserController::class,
+            // security: "is_granted('ROLE_ADMIN') or (object == user and previous_object == user)",
+            // read: false,
+            normalizationContext: ['groups' => ['userByGroups:get:read']],
+            openapiContext: [
+                'summary' => 'Retourne les groupes et leurs utilisateurs', 
+            ]
+        ),
+        new Post(
+            denormalizationContext: ['groups' => ['group:post:read']],
+            normalizationContext: ['groups' => ['group:get:read']],
+
+        )
 
     ],
         
     // normalizationContext: ['groups' => ['user:getCollection:read']],
 )]
-#[Post(processor: GroupeStateProcessor::class)]
-#[Put(processor: GroupeStateProcessor::class)]
+
 
 class Groupe
 {
@@ -42,8 +61,7 @@ class Groupe
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:getCollection:read', 'user:get:read'])]
-    // #[Groups(['user:get:read'])]
+    #[Groups(['user:getCollection:read', 'group:get:read', 'userByGroups:get:read', 'group:post:read',])]
     private ?string $name = null;
 
     #[ORM\Column]
@@ -52,6 +70,7 @@ class Groupe
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[Groups([ 'userByGroups:get:read'])]
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: User::class)]
     private Collection $users;
 
