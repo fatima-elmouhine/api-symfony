@@ -1,6 +1,4 @@
 <?php
-// api/src/OpenApi/JwtDecorator.php
-
 namespace App\OpenApi;
 
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
@@ -55,7 +53,7 @@ final class JwtDecorator implements OpenApiFactoryInterface
                 tags: ['Token'],
                 responses: [
                     '200' => [
-                        'description' => 'Get JWT token',
+                        'description' => 'Obtenir JWT token',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -65,9 +63,9 @@ final class JwtDecorator implements OpenApiFactoryInterface
                         ],
                     ],
                 ],
-                summary: 'Get JWT token to login.',
+                summary: 'Retourne un JWT au login',
                 requestBody: new Model\RequestBody(
-                    description: 'Generate new JWT Token',
+                    description: 'Générer un nouveau JWT Token',
                     content: new \ArrayObject([
                         'application/json' => [
                             'schema' => [

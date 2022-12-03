@@ -8,7 +8,6 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Operation;
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\State\ProcessorInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserStateProcessor implements ProcessorInterface
@@ -22,7 +21,6 @@ class UserStateProcessor implements ProcessorInterface
     
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): void 
     {
-        // dd($uriVariables);
         if($operation instanceof Post) {
             $data->setCreatedAt(new \DateTimeImmutable());
             $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPassword()));
@@ -30,8 +28,10 @@ class UserStateProcessor implements ProcessorInterface
         }
         if($operation instanceof Put || $operation instanceof Patch) {
             $data->setUpdatedAt(\DateTimeImmutable::createFromMutable(new \DateTime()));
-            $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPassword()));
+            if ($data->getPassword() !== $context['previous_data']->getPassword()) {
+                $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPassword()));
 
+            }
             
         }
 

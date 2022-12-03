@@ -15,68 +15,90 @@ use App\State\CurrentUserProvider;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use App\Controller\UserGroupController;
+use MessageFormatter;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 
-#[Post(processor: UserStateProcessor::class)]
+// #[Post(processor: UserStateProcessor::class)]
 
 #[ApiResource(
     formats: ['json'],
     operations: [
 
-        // Route Get :  /users/{id}
+        // Route GET :  /users/{id}
         new Get(
             normalizationContext: ['groups' => ['get:user:IfRoleUser']],
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_USER')",
+            openapiContext: [
+                'summary' => 'Retourne les informations d\'un utilisateur (nom prenom email groupe)', 
+            ]
         ),
 
-        // Route Put :  /users/{id}
+        // Route PATCH :  /users/{id}
         new Patch(
             denormalizationContext: ['groups' => ['user:patch:write']],
             normalizationContext: ['groups' => ['user:patch:read']],
             processor: UserStateProcessor::class,
             security: "is_granted('ROLE_ADMIN') or (object == user and previous_object == user)",
             securityMessage: "Vous n'avez pas les droits pour modifier cet utilisateur",
+            openapiContext: [
+                'summary' => 'Modifier un utilisateur', 
+            ]
         ),
 
-        // Route Post :  /users/
+        // Route POST :  /users/
         new Post(
             denormalizationContext: ['groups' => ['user:post:write']],
-            normalizationContext: ['groups' => ['user:post:test']],
+            normalizationContext: ['groups' => ['user:post:returnData']],
             output: [],
+            processor: UserStateProcessor::class,
+            openapiContext: [
+                'summary' => 'Inscrire un utilisateur', 
+            ]
         ),
 
-        // Route Get :  /users/
+        // Route GET :  /users/
         new GetCollection(
             normalizationContext: ['groups' => ['user:getCollection:read']],
+            openapiContext: [
+                'summary' => 'Liste des utilisateurs (nom, prenom)', 
+            ]
         ),
-        // Route Get :  /admin/users/
-        
+
+        // Route GET :  /admin/users/
         new GetCollection(
             uriTemplate: 'admin/users',
             security: "is_granted('ROLE_ADMIN')",
-            securityMessage: "Vous n'avez pas les droits pour modifier cet utilisateur",
+            securityMessage: "Vous n'avez pas les droits pour consulter ces informations",
+            openapiContext: [
+                'summary' => 'Admin - Liste des utilisateurs', 
+            ]
         ),
 
-        // Route Get :  /users/me
+        // Route GET :  /users/me
         new Get(
             uriTemplate : '/me',
             provider: CurrentUserProvider::class,
             normalizationContext: ['groups' => ['user:get:read']],
             security: "is_granted('ROLE_USER')",
+            openapiContext: [
+                'summary' => 'Retoune les informations de l\'utilisateur connecté ', 
+            ]
         ),
 
-        // Route Delete :  /users/{id}
-
+        // Route DELETE :  /users/{id}
         new Delete(
             security: "is_granted('ROLE_ADMIN') or (object == user and previous_object == user)",
             securityMessage: "Vous n'avez pas les droits pour supprimer cet utilisateur",
+            openapiContext: [
+                'summary' => 'Admin - Supprime un utilisateur', 
+            ]
         ),
 
-        // Route Put :  /addUser/{id}/toGroup/{group}
+        // Route PUT :  /addUser/{id}/toGroup/{group}
         new Put(
             uriTemplate : '/addUser/{id}/toGroup/{group}',
             controller: UserGroupController::class,
@@ -96,12 +118,10 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
                     ]
                 ]
             ]
-        //     normalizationContext: ['groups' => ['user:get:read']],
         ),
        
 
     ],
-    // normalizationContext: ['groups' => ['user:getCollection:read']],
 )]
 
 
@@ -110,7 +130,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    // #[Groups(['user:get:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]

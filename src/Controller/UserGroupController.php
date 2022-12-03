@@ -4,10 +4,8 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\Groupe;
-use ApiPlatform\Metadata\Put;
 use App\Repository\GroupeRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -25,10 +23,9 @@ class UserGroupController extends AbstractController
         $this->security = $security;
     }
 
-    public function __invoke(string $id, string $group, GroupeRepository $groupeRepository, Request $request ) : Response
+    public function __invoke(string $id, string $group, GroupeRepository $groupeRepository ) : Response
 
     {  
-        // dd($this->security->getUser()->getRoles()[0]);
 
         if ($id == $this->security->getUser()->getId() || $this->security->getUser()->getRoles()[0] == 'ROLE_ADMIN') {
             $groupInfo= $groupeRepository->find($group);

@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Delete;
 use Doctrine\ORM\Mapping as ORM;
 use App\State\GroupeStateProcessor;
 use App\Repository\GroupeRepository;
@@ -15,41 +16,70 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[Post(processor: GroupeStateProcessor::class)]
-#[Put(processor: GroupeStateProcessor::class)]
 #[ORM\Entity(repositoryClass: GroupeRepository::class)]
 #[ApiResource(
     formats: ['json'],
     operations: [
+
+        // Route GET : /groupes/
         new GetCollection(
-            // read: true, 
             normalizationContext: ['groups' => ['user:getCollection:read']],
+            openapiContext: [
+                'summary' => 'Liste des groupes', 
+            ]
 
         ),
-        new Get(
-            // read: true, 
-            normalizationContext: ['groups' => ['group:get:read']],
-        ),
 
+        // Route GET : /groups/users
         new GetCollection(
             uriTemplate : '/groups/users',
             controller: GroupUserController::class,
-            // security: "is_granted('ROLE_ADMIN') or (object == user and previous_object == user)",
-            // read: false,
             normalizationContext: ['groups' => ['userByGroups:get:read']],
             openapiContext: [
                 'summary' => 'Retourne les groupes et leurs utilisateurs', 
             ]
         ),
+
+        // Route GET : /groupes/{id}
+        new Get(
+            normalizationContext: ['groups' => ['group:get:read']],
+            openapiContext: [
+                'summary' => 'Retourne les informations d\'un groupe', 
+            ]
+        ),
+
+        // Route PUT : /groupes/{id}
+        new Put(
+            security: "is_granted('ROLE_ADMIN')",
+            denormalizationContext: ['groups' => ['group:put:write']],
+            normalizationContext: ['groups' => ['group:put:read']],
+            processor: GroupeStateProcessor::class,
+            openapiContext: [
+                'summary' => 'Admin - Modifier un groupe', 
+            ]
+        ),
+        
+        // Route POST : /groupes/
         new Post(
+            security: "is_granted('ROLE_ADMIN')",
+            processor: GroupeStateProcessor::class,
             denormalizationContext: ['groups' => ['group:post:read']],
             normalizationContext: ['groups' => ['group:get:read']],
+            openapiContext: [
+                'summary' => 'Admin - Ajouter les groupes', 
+            ]
+        ),
+        // Route DELETE : /groupes/{id}
+        new Delete(
+            security: "is_granted('ROLE_ADMIN')",
+            openapiContext: [
+                'summary' => 'Admin - Supprimer un groupe', 
+            ]
 
         )
 
     ],
         
-    // normalizationContext: ['groups' => ['user:getCollection:read']],
 )]
 
 
@@ -61,7 +91,7 @@ class Groupe
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:getCollection:read', 'group:get:read', 'userByGroups:get:read', 'group:post:read',])]
+    #[Groups(['user:getCollection:read', 'group:get:read', 'userByGroups:get:read', 'group:post:read','group:put:write'])]
     private ?string $name = null;
 
     #[ORM\Column]

@@ -2,14 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Entity\Groupe;
-use DateTimeImmutable;
-use App\Repository\GroupeRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -23,13 +18,11 @@ class GroupUserController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
-    public function __invoke( GroupeRepository $groupeRepository, Request $request ) : Response
+    public function __invoke( ) : Response
 
     {  
         $groupInfo = $this->entityManager->getRepository(Groupe::class)->findAll();
-
         $arrayDataGroup = [];
-
         foreach ($groupInfo as $key => $value) {
             $arrayDataGroup[$key]['name'] = $value->getName();
             $users = $value->getUsers();

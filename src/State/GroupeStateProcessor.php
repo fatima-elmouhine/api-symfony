@@ -16,10 +16,7 @@ class GroupeStateProcessor implements ProcessorInterface
     
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): void
     {
-        // Handle the state
-        // dd('titi');
 
-        // dd($operation instanceof Put);
         if($operation instanceof Post) {
             $data->setCreatedAt(new \DateTimeImmutable());
         }
